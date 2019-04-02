@@ -21,7 +21,10 @@ from flask_jwt_extended import (
     get_raw_jwt
 )
 
-from .models import User, db
+from .models import User, Notification, db
+from app.candidates_module.models import Candidate
+from app.staff_module.models import Staff_member
+from app.managers_module.models import Manager
 from sqlalchemy.exc import SQLAlchemyError
 
 module = Blueprint('api', __name__, url_prefix='/api')
@@ -54,3 +57,70 @@ def refresh():
         'access_token': create_access_token(identity=current_user)
     }
     return jsonify(ret), 200
+
+
+@module.route('/profile', methods=["GET"])
+@jwt_required
+def profile_info():
+    user = User.query.get(request.args.get('login'))
+    response_data = []
+    if user.role == 'candidate':
+        candidate = Candidate.query.get(request.args.get('login'))
+        response_data = {
+            'name': candidate.name,
+            'surname': candidate.surname,
+            'second_name': candidate.second_name,
+            'role': 'candidate',
+            'status': candidate.state
+        }
+    if user.role == 'staff_member':
+        staff = Staff_member.query.get(request.args.get('login'))
+        response_data = {
+            'name': staff.name,
+            'surname': staff.surname,
+            'second_name': staff.second_name,
+            'role': 'staff_member'
+        }
+    if user.role == 'manager':
+        manager = Manager.query.get(request.args.get('login'))
+        response_data = {
+            'name': manager.name,
+            'surname': manager.surname,
+            'second_name': manager.second_name,
+            'role': 'manager'
+        }
+    return make_response(jsonify(response_data)), 200
+
+@module.route('/changeProfile', methods=["POST"])
+@jwt_required
+def change_profile_info():
+    user = User.query.get(request.args.get('login'))
+    response_data = []
+    if user.role == 'candidate':
+        candidate = Candidate.query.get(request.args.get('login'))
+        candidate.name = request.get_json().get('name')
+        candidate.surname = request.get_json().get('surname')
+        candidate.status = request.get_json().get('status')
+    if user.role == 'staff_member':
+        staff = Staff_member.query.get(request.args.get('login'))
+        staff.name = request.get_json().get('name')
+        staff.surname = request.get_json().get('surname')
+    if user.role == 'manager':
+        manager = Manager.query.get(request.args.get('login'))
+        manager.name = request.get_json().get('name')
+        manager.surname = request.get_json().get('surname')
+    return make_response(jsonify(response_data)), 200
+
+
+@module.route('/getNotifications', methods=["GET"])
+@jwt_required
+def get_notifications():
+    notifications = Notification.query.filter_by(interviewer=request.args.get('login')).all()
+    response_data = []
+    for notification in notifications:
+        response_data.append({
+            'date': notification.date,
+            'body': notification.interviewer.body,
+            'status': notification.status
+        })
+    return make_response(jsonify(response_data)), 200

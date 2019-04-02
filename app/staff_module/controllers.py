@@ -21,6 +21,7 @@ from flask_jwt_extended import (
     get_raw_jwt
 )
 
+from app.managers_module.models import Interview
 from .models import Staff_member, db
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -57,7 +58,7 @@ def refresh():
 
 @module.route('/profile', methods=["GET"])
 @jwt_required
-def profile_info():
+def get_profile_info():
     user = Staff_member.query.get(request.args.get('login'))
     response = {
         'name': user.name,
@@ -65,3 +66,18 @@ def profile_info():
         'second_name': user.second_name
     }
     return make_response(jsonify(response)), 200
+
+
+@module.route('/interviews', methods=["GET"])
+@jwt_required
+def get_interviews():
+
+    interviews = Interview.query.filter_by(interviewer=request.args.get('login')).all()
+    response_data = []
+    for interview in interviews:
+        response_data.append({
+            'student': interview.student,
+            'interviewer': interview.interviewer,
+            'date': interview.date
+        })
+    return make_response(jsonify(response_data)), 200

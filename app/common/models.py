@@ -11,3 +11,17 @@ class User(db.Model):
         self.role = role
         self.login = login
         self.password = password
+
+
+class Notification(db.Model):
+    __tablename__ = 'notifications'
+
+    id = db.Column(db.Integer, primary_key=True)
+    receiver = db.Column(db.String(50))
+    body = db.Column(db.Text)
+    status = db.Column(db.Integer)
+
+    def __init__(self, receiver, body, status):
+        self.receiver = receiver
+        self.body = body
+        self.status = status

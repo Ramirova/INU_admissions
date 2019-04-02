@@ -26,6 +26,7 @@ from flask_jwt_extended import (
 )
 
 from app.common.models import User
+from app.managers_module.models import Interview
 from .models import Candidate, db
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -33,54 +34,22 @@ module = Blueprint('candidates', __name__, url_prefix='/candidates')
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
-# @module.route('/login', methods=["POST"])
-# def auth():
+
+# @module.route('/change_profile', methods=["POST"])
+# @jwt_required
+# def change_profile_info():
 #     candidate = Candidate.query.get(request.get_json().get('login'))
-#     auth_token = create_access_token(identity=candidate.login)
-#     if auth_token:
-#         response = {
-#             'token': auth_token,
-#             'refresh_token': create_refresh_token(identity=candidate.login)
-#         }
-#         return make_response(jsonify(response)), 200
-#     return Response("", status=401, mimetype='application/json')
-
-
-# The jwt_refresh_token_required decorator insures a valid refresh
-# token is present in the request before calling this endpoint. We
-# can use the get_jwt_identity() function to get the identity of
-# the refresh token, and use the create_access_token() function again
-# to make a new access token for this identity.
-# @module.route('/refresh', methods=['POST'])
-# @jwt_refresh_token_required
-# def refresh():
-#     current_user = get_jwt_identity()
-#     ret = {
-#         'access_token': create_access_token(identity=current_user)
-#     }
-#     return jsonify(ret), 200
-
-
-@module.route('/profile', methods=["GET"])
-@jwt_required
-def profile_info():
-    candidate = Candidate.query.get(request.args.get('login'))
-    response = {
-        'name': candidate.name,
-        'surname': candidate.surname,
-        'second_name': candidate.second_name,
-        'date_of_birth': candidate.date_of_birth,
-        'nationality': candidate.nationality,
-    }
-    return make_response(jsonify(response)), 200
-
-
-@module.route('/change_profile', methods=["POST"])
-@jwt_required
-def change_profile_info():
-    candidate = Candidate.query.get(request.get_json().get('login'))
-
-    return None
+#     candidate.name =
+#     candidate.surname =
+#     candidate.
+#     “name”: string,
+#     “surname”: string,
+#     “photo”: url?,
+#     “role”: string ????
+#     “status”: string -> optional,
+#     “progress”: int(0.
+#     .100).
+#     return None
 
 
 @module.route('/upload', methods=['POST'])
@@ -112,12 +81,57 @@ def register():
     date_of_birth = request.get_json().get('date_of_birth')
     nationality = request.get_json().get('nationality')
     skype = request.get_json().get('skype')
+    contact_number = request.get_json().get('contact_number')
+    program = request.get_json().get('program')
     candidate = Candidate.query.get(request.get_json().get('login'))
     if not candidate:
-        new_candidate = Candidate(login, password, name, surname, second_name, date_of_birth, nationality, skype)
+        new_candidate = Candidate(login, password, name, surname, second_name, date_of_birth, nationality, skype,
+                                  contact_number, program)
         new_user = User(login, password, 'candidate')
         db.session.add(new_candidate)
         db.session.add(new_user)
         db.session.commit()
         return Response("Success", status=200, mimetype='application/json')
-    return Response("User with given login already exists", status=201, mimetype='application/json')
+    return Response("User with given login already exists", status=401, mimetype='application/json')
+
+@module.route('/profileDetails', methods=['POST'])
+def register():
+    contact_number = request.get_json().get('contact_number')
+    program = request.get_json().get('program')
+    nationality = request.get_json().get('nationality')
+    skype = request.get_json().get('skype')
+    candidate = Candidate.query.get(request.get_json().get('login'))
+    if candidate:
+        candidate.nationality = nationality
+        candidate.skype = skype
+        candidate.program = program
+        candidate.phone_number = contact_number
+        db.session.commit()
+        return Response("Success", status=200, mimetype='application/json')
+    return Response("User with given login does not exist", status=401, mimetype='application/json')
+
+
+@module.route('/profile', methods=["GET"])
+@jwt_required
+def profile_info():
+    candidate = Candidate.query.get(request.args.get('login'))
+    response = {
+        'telephone': candidate.phone_number,
+        'email': candidate.login,
+        'program': candidate.program,
+        'country': candidate.nationality,
+        'skype': candidate.skype,
+    }
+    return make_response(jsonify(response)), 200
+
+
+@module.route('/interviews', methods=["GET"])
+@jwt_required
+def get_interviews():
+    interview = Interview.query.filter_by(student=request.args.get('login')).first()
+    response_data = {
+        'student': interview.student,
+        'interviewer': interview.interviewer,
+        'date': interview.date
+    }
+    return make_response(jsonify(response_data)), 200

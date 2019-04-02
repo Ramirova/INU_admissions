@@ -15,3 +15,18 @@ class Manager(db.Model):
         self.password = password
         self.surname = surname
         self.second_name = second_name
+
+
+class Interview(db.Model):
+    __tablename__ = 'interviews'
+    id = db.Column(db.Integer, primary_key=True)
+    student = db.Column(db.String(50))
+    interviewer = db.Column(db.String(50))
+    date = db.Column(db.Date)
+
+    def __init__(self, student, interviewer, date):
+        self.student = student
+        self.interviewer = interviewer
+        self.date = date
+
+

@@ -24,7 +24,7 @@ from flask_jwt_extended import (
 
 from app.candidates_module.models import Candidate
 from app.staff_module.models import Staff_member
-from .models import Manager, db
+from .models import Manager, Interview, db
 from sqlalchemy.exc import SQLAlchemyError
 
 module = Blueprint('managers', __name__, url_prefix='/managers')
@@ -69,18 +69,6 @@ def update_candidate_status():
     return Response("", status=201, mimetype='application/json')
 
 
-@module.route('/profile', methods=["GET"])
-@jwt_required
-def profile_info():
-    candidate = Manager.query.get(request.args.get('login'))
-    response = {
-        'name': candidate.name,
-        'surname': candidate.surname,
-        'second_name': candidate.second_name
-    }
-    return make_response(jsonify(response)), 200
-
-
 @module.route('/users', methods=["GET"])
 @jwt_required
 def get_users():
@@ -108,4 +96,13 @@ def get_users():
     return make_response(jsonify(result_data)), 200
 
 
-
+@module.route('/interview', methods=["POST"])
+@jwt_required
+def create_interview():
+    candidate = request.get_json().get('candidate')
+    staff_member = request.get_json().get('staff_member')
+    date = request.get_json().get('date')
+    interview = Interview(candidate, staff_member, date)
+    db.session.add(interview)
+    db.commit()
+    return make_response(""), 200
