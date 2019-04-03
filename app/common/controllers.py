@@ -34,15 +34,21 @@ module = Blueprint('api', __name__, url_prefix='/api')
 @module.route('/login', methods=["POST"])
 def auth():
     user = User.query.get(request.get_json().get('login'))
-    auth_token = create_access_token(identity=user.login)
-    if auth_token:
-        response = {
-            'token': auth_token,
-            'refresh_token': create_refresh_token(identity=user.login),
-            'role': user.role
-        }
-        return make_response(jsonify(response)), 200
-    return Response("", status=401, mimetype='application/json')
+    if user:
+        if user.password == request.get_json().get('password'):
+            auth_token = create_access_token(identity=user.login)
+            if auth_token:
+                response = {
+                    'token': auth_token,
+                    'refresh_token': create_refresh_token(identity=user.login),
+                    'role': user.role
+                }
+                return make_response(jsonify(response)), 200
+            return Response("", status=401, mimetype='application/json')
+        else:
+            return Response("Wrong password", status=401, mimetype='application/json')
+    else:
+        return Response("Wrong login", status=401, mimetype='application/json')
 
 
 # The jwt_refresh_token_required decorator insures a valid refresh
