@@ -35,13 +35,13 @@
     },
     {
       "question":"Result of a right shift operation 0x80 >> is equal to ",
-      "answer_type":"open_anser",
+      "answer_type":"open_answer",
       "answer_options": [
       ]
     },
     {
       "question":"The 8-bit unsigned octal number 255 represents decimal number:",
-      "answer_type":"open_anser",
+      "answer_type":"open_answer",
       "answer_options": [
       ]
     },

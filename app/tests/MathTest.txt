@@ -36,13 +36,13 @@ It crosses another train running in opposite direction at the speed of 80 kmph i
     {
       "question":"Liberland army ranks grows as follows: soldier, lieutenant,  captain, major, colonel, general. Each next rank commands exactly to 9 persons 1-rank lower. 
 What is the highest rank in army of 820 people?",
-      "answer_type":"open_anser",
+      "answer_type":"open_answer",
       "answer_options": [
       ]
     },
     {
       "question":"Hydra reproduces dividing into 2 hidras each 8 hours. Pools can contain 1 073 741 824 hydras at most.I have 1 hydra in my pool. How many days will take hydras to fill my pool?",
-      "answer_type":"open_anser",
+      "answer_type":"open_answer",
       "answer_options": [
       ]
     },

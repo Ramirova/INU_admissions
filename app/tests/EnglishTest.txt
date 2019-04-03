@@ -32,13 +32,13 @@
     },
     {
       "question":"Replace the word in the sentence with a suitable phrasal verb: So when do the children ___ for Christmas? (close for the holidays)",
-      "answer_type":"open_anser",
+      "answer_type":"open_answer",
       "answer_options": [
       ]
     },
     {
       "question":"Replace the word in the sentence with a suitable phrasal verb: I haven?t seen you in so long! We have to a date for lunch! (arrange)",
-      "answer_type":"open_anser",
+      "answer_type":"open_answer",
       "answer_options": [
       ]
     },
