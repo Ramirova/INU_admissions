@@ -1,0 +1,51 @@
+{
+  "questions": [
+    {
+      "question":"Which of the following equation graph is parallel to the graph of y=2x",
+      "answer_type":"single_choice",
+      "answer_options": [
+        "4x - y = 4",
+        "2x - 2y = 2",
+        "x - 2y = 4",
+	"2x - y = 4"
+      ]
+    },
+    {
+      "question":"There are five balls in the backet: red, green, blue, orange and black. 
+Each turn you pick a random ball from the bucket. What is the probability that at 2d turn you will pick green ball?",
+      "answer_type":"single_choice",
+      "answer_options": [
+        "1/2",
+        "2/3",
+        "1/3",
+	"2/5",
+	"1/5"
+      ]
+    },
+    {
+      "question":"A train having a length of 270 meter is running at the speed of 120 kmph . 
+It crosses another train running in opposite direction at the speed of 80 kmph in 9 seconds. What is the length of the other train?",
+      "answer_type":"single_choice",
+      "answer_options": [
+        "210 m",
+        "230 m",
+        "190 m",
+	"320 m"
+      ]
+    },
+    {
+      "question":"Liberland army ranks grows as follows: soldier, lieutenant,  captain, major, colonel, general. Each next rank commands exactly to 9 persons 1-rank lower. 
+What is the highest rank in army of 820 people?",
+      "answer_type":"open_anser",
+      "answer_options": [
+      ]
+    },
+    {
+      "question":"Hydra reproduces dividing into 2 hidras each 8 hours. Pools can contain 1 073 741 824 hydras at most.I have 1 hydra in my pool. How many days will take hydras to fill my pool?",
+      "answer_type":"open_anser",
+      "answer_options": [
+      ]
+    },
+  
+  ]
+}

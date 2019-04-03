@@ -27,7 +27,7 @@ from flask_jwt_extended import (
 
 from app.common.models import User
 from app.managers_module.models import Interview
-from .models import Candidate, db
+from .models import Candidate, Tests, TestsStates, db
 from sqlalchemy.exc import SQLAlchemyError
 
 module = Blueprint('candidates', __name__, url_prefix='/candidates')
@@ -63,7 +63,7 @@ def upload_file():
         return 'No selected file'
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], candidate.login, filename))
+        file.save(os.path.join("app/user_files/", candidate.login, filename))
     return Response("", status=200, mimetype='application/json')
 
 
@@ -85,17 +85,33 @@ def register():
     program = request.get_json().get('program')
     candidate = Candidate.query.get(request.get_json().get('login'))
     if not candidate:
+        try:
+            os.mkdir("app/user_files/" + login, 0o755)
+        except OSError:
+            print("Creation of the directory %s failed" % "app/user_files/" + login)
+
+        new_user = User(login, password, 'candidate')
+        db.session.add(new_user)
+        db.session.commit()
         new_candidate = Candidate(login, password, name, surname, second_name, date_of_birth, nationality, skype,
                                   contact_number, program)
-        new_user = User(login, password, 'candidate')
+
         db.session.add(new_candidate)
-        db.session.add(new_user)
+
+        db.session.commit()
+
+        tests = Tests.query.filter_by(program=program).all()
+        for test in tests:
+            new_test_progress = TestsStates(login, test.name)
+            db.session.add(new_test_progress)
+
         db.session.commit()
         return Response("Success", status=200, mimetype='application/json')
     return Response("User with given login already exists", status=401, mimetype='application/json')
 
+
 @module.route('/profileDetails', methods=['POST'])
-def register():
+def profile_details():
     contact_number = request.get_json().get('contact_number')
     program = request.get_json().get('program')
     nationality = request.get_json().get('nationality')
@@ -135,3 +151,25 @@ def get_interviews():
         'date': interview.date
     }
     return make_response(jsonify(response_data)), 200
+
+
+@module.route('/testInfo', methods=["GET"])
+@jwt_required
+def get_tests():
+    tests = TestsStates.query.filter_by(candidate=request.args.get('login')).all()
+    response_data = []
+    for test in tests:
+        response_data.append({
+            'test_name': test.name,
+            'status': test.status,
+            'result': test.result
+        })
+    return make_response(jsonify(response_data)), 200
+
+@module.route('/testData', methods=["GET"])
+@jwt_required
+def get_test_data():
+    test = Tests.query.filter_by(name=request.args.get('test_name')).first()
+    with open("app/tests/" + test.filename, "r") as file:
+        data = file.read()
+    return Response(data, status=200, mimetype='application/json')

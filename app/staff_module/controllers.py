@@ -71,7 +71,6 @@ def get_profile_info():
 @module.route('/interviews', methods=["GET"])
 @jwt_required
 def get_interviews():
-
     interviews = Interview.query.filter_by(interviewer=request.args.get('login')).all()
     response_data = []
     for interview in interviews:

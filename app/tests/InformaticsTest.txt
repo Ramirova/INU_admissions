@@ -1,0 +1,69 @@
+{
+  "questions": [
+    {
+      "question":" The 16-bit unsigned binary number 0000 0001 0000 1111 represents decimal number:",
+      "answer_type":"single_choice",
+      "answer_options": [
+        "5",
+        "15",
+        "16",
+	"271",
+	"272"
+      ]
+    },
+    {
+      "question":"The 8-bit signed binary number (two's complement represantation) 1000 1111 represents decimal number:",
+      "answer_type":"single_choice",
+      "answer_options": [
+        "143",
+        "15",
+        "-15",
+	"112",
+	"-113"
+      ]
+    },
+    {
+      "question":"Which operator you would use for turming on a particular bit in a number",
+      "answer_type":"single_choice",
+      "answer_options": [
+        "AND",
+        "OR",
+        "XOR",
+	"NAND",
+	"NOR"
+      ]
+    },
+    {
+      "question":"Result of a right shift operation 0x80 >> is equal to ",
+      "answer_type":"open_anser",
+      "answer_options": [
+      ]
+    },
+    {
+      "question":"The 8-bit unsigned octal number 255 represents decimal number:",
+      "answer_type":"open_anser",
+      "answer_options": [
+      ]
+    },
+    {
+      "question":"Select only imperative types of programming languages",
+      "answer_type":"multiple_choice",
+      "answer_options": [
+        "Java",
+        "Haskell",
+        "C",
+	"Prolog"
+      ]
+    },
+    {
+      "question":"Select only object-oriented types of programming languages",
+      "answer_type":"multiple_choice",
+      "answer_options": [
+        "C",
+        "Java",
+        "C#",
+	"Haskell"
+      ]
+    }
+  ]
+}

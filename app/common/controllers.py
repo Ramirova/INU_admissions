@@ -9,7 +9,8 @@ from flask import (
     current_app,
     Response,
     jsonify,
-    make_response
+    make_response,
+    send_from_directory
 )
 
 from flask_jwt_extended import (
@@ -124,3 +125,12 @@ def get_notifications():
             'status': notification.status
         })
     return make_response(jsonify(response_data)), 200
+
+
+@module.route('/download', methods=['GET'])
+@jwt_required
+def download():
+    login = request.args.get('login')
+    filename = request.args.get('filename')
+    uploads = "app/user_files/" + login
+    return send_from_directory(directory=uploads, filename=filename)

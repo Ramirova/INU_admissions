@@ -32,3 +32,36 @@ class Candidate(db.Model, JsonModel):
         self.interview = None
         self.program = program
         self.phone_number = phone_number
+
+
+class TestsStates(db.Model):
+    __tablename__ = 'testsStates'
+
+    id = db.Column(db.Integer, primary_key=True)
+    candidate = db.Column(db.Text)
+    test = db.Column(db.Text)
+    status = db.Column(db.Text)
+    result = db.Column(db.Text)
+    permission = db.Column(db.Text)
+
+    def __init__(self, candidate, test):
+        self.candidate = candidate
+        self.test = test
+        self.status = "not attempted"
+        self.result = "-1"
+        self.permission = "restricted"
+
+
+class Tests(db.Model):
+    __tablename__ = 'tests'
+
+    name = db.Column(db.Text, primary_key=True)
+    subject = db.Column(db.Text)
+    program = db.Column(db.Text)
+    filename = db.Column(db.Text)
+
+    def __init__(self, name, subject, program, filename):
+        self.name = name
+        self.subject = subject
+        self.program = program
+        self.filename = filename
