@@ -22,7 +22,7 @@ from flask_jwt_extended import (
     get_raw_jwt
 )
 
-from app.candidates_module.models import Candidate
+from app.candidates_module.models import Candidate, TestsStates
 from app.staff_module.models import Staff_member
 from .models import Manager, Interview, db
 from sqlalchemy.exc import SQLAlchemyError
@@ -57,7 +57,7 @@ module = Blueprint('managers', __name__, url_prefix='/managers')
 #     }
 #     return jsonify(ret), 200
 
-@module.route('/upload', methods=['POST'])
+@module.route('/updateStatus', methods=['POST'])
 @jwt_required
 def update_candidate_status():
     candidate = Candidate.query.get(request.get_json().get('login'))
@@ -65,8 +65,15 @@ def update_candidate_status():
     if candidate:
         candidate.status = status
         db.session.commit()
+
+        if status == 'PASSING_TESTS':
+            test_states = TestsStates.query.filter_by(candidate=candidate.login).all()
+            for test_state in test_states:
+                test_state.permission = "granted"
+                db.session.commit()
+
         return Response("Success", status=200, mimetype='application/json')
-    return Response("", status=201, mimetype='application/json')
+    return Response("", status=401, mimetype='application/json')
 
 
 @module.route('/users', methods=["GET"])
