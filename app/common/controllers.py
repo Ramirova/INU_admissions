@@ -127,7 +127,7 @@ def change_profile_info():
         manager.name = request.get_json().get('name')
         manager.surname = request.get_json().get('surname')
     db.session.commit()
-    return make_response(jsonify(response_data)), 200
+    return Response("Success", status=200, mimetype='application/json')
 
 
 @module.route('/getNotifications', methods=["GET"])
