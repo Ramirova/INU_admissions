@@ -162,7 +162,7 @@ def get_tests():
     response_data = []
     for test in tests:
         response_data.append({
-            'test_name': test.name,
+            'test_name': test.test,
             'status': test.status,
             'result': test.result
         })
