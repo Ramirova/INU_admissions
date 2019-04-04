@@ -87,7 +87,8 @@ def profile_info():
             'second_name': candidate.second_name,
             'role': 'candidate',
             'status': candidate.state,
-            'progress': candidate_progress[candidate.state]
+            'progress': candidate_progress[candidate.state],
+            'photo': "app/user_files/sample_photo.png"
         }
     if user.role == 'staff_member':
         staff = Staff_member.query.get(request.args.get('login'))
@@ -106,6 +107,7 @@ def profile_info():
             'role': 'manager'
         }
     return make_response(jsonify(response_data)), 200
+
 
 @module.route('/changeProfile', methods=["POST"])
 @jwt_required
