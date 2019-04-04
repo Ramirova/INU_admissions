@@ -112,7 +112,7 @@ def profile_info():
 @module.route('/changeProfile', methods=["POST"])
 @jwt_required
 def change_profile_info():
-    login = request.get_json().get('login')
+    login = request.args.get('login')
     user = User.query.get(login)
     response_data = []
     if user.role == 'candidate':
