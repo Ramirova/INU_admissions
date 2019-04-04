@@ -30,7 +30,7 @@ from app.managers_module.models import Interview
 from .models import Candidate, Tests, TestsStates, db
 from sqlalchemy.exc import SQLAlchemyError
 
-module = Blueprint('candidates', __name__, url_prefix='api/candidates')
+module = Blueprint('candidates', __name__, url_prefix='/api/candidates')
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
