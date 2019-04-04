@@ -25,7 +25,7 @@ from app.managers_module.models import Interview
 from .models import Staff_member, db
 from sqlalchemy.exc import SQLAlchemyError
 
-module = Blueprint('staff', __name__, url_prefix='/staff')
+module = Blueprint('staff', __name__, url_prefix='/api/staff')
 
 
 @module.route('/login', methods=["POST"])
