@@ -135,7 +135,7 @@ def change_profile_info():
 @module.route('/getNotifications', methods=["GET"])
 @jwt_required
 def get_notifications():
-    notifications = Notification.query.filter_by(interviewer=request.args.get('login')).all()
+    notifications = Notification.query.filter_by(receiver=request.args.get('login')).all()
     response_data = []
     for notification in notifications:
         response_data.append({
