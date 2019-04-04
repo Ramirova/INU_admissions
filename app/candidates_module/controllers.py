@@ -113,10 +113,11 @@ def register():
 @module.route('/profileDetails', methods=['POST'])
 @jwt_required
 def profile_details():
-    contact_number = request.get_json().get('contact_number')
+    contact_number = request.get_json().get('telephone')
     program = request.get_json().get('program')
-    nationality = request.get_json().get('nationality')
+    nationality = request.get_json().get('country')
     skype = request.get_json().get('skype')
+
     candidate = Candidate.query.get(request.get_json().get('login'))
     if candidate:
         candidate.nationality = nationality
