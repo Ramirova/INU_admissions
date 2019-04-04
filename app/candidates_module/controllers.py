@@ -30,7 +30,7 @@ from app.managers_module.models import Interview
 from .models import Candidate, Tests, TestsStates, db
 from sqlalchemy.exc import SQLAlchemyError
 
-module = Blueprint('candidates', __name__, url_prefix='/candidates')
+module = Blueprint('candidates', __name__, url_prefix='api/candidates')
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
 
@@ -111,6 +111,7 @@ def register():
 
 
 @module.route('/profileDetails', methods=['POST'])
+@jwt_required
 def profile_details():
     contact_number = request.get_json().get('contact_number')
     program = request.get_json().get('program')
