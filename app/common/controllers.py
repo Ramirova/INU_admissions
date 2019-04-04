@@ -110,21 +110,23 @@ def profile_info():
 @module.route('/changeProfile', methods=["POST"])
 @jwt_required
 def change_profile_info():
-    user = User.query.get(request.args.get('login'))
+    login = request.get_json().get('login')
+    user = User.query.get(login)
     response_data = []
     if user.role == 'candidate':
-        candidate = Candidate.query.get(request.args.get('login'))
+        candidate = Candidate.query.get(login)
         candidate.name = request.get_json().get('name')
         candidate.surname = request.get_json().get('surname')
-        candidate.status = request.get_json().get('status')
+        candidate.state = request.get_json().get('status')
     if user.role == 'staff_member':
-        staff = Staff_member.query.get(request.args.get('login'))
+        staff = Staff_member.query.get(login)
         staff.name = request.get_json().get('name')
         staff.surname = request.get_json().get('surname')
     if user.role == 'manager':
-        manager = Manager.query.get(request.args.get('login'))
+        manager = Manager.query.get(login)
         manager.name = request.get_json().get('name')
         manager.surname = request.get_json().get('surname')
+    db.session.commit()
     return make_response(jsonify(response_data)), 200
 
 
