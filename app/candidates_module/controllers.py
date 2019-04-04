@@ -147,12 +147,15 @@ def profile_info():
 @jwt_required
 def get_interviews():
     interview = Interview.query.filter_by(student=request.args.get('login')).first()
-    response_data = {
-        'student': interview.student,
-        'interviewer': interview.interviewer,
-        'date': interview.date
-    }
-    return make_response(jsonify(response_data)), 200
+    if interview:
+        response_data = {
+            'student': interview.student,
+            'interviewer': interview.interviewer,
+            'date': interview.date
+        }
+        return make_response(jsonify(response_data)), 200
+    else:
+        return make_response(jsonify([])), 200
 
 
 @module.route('/testInfo', methods=["GET"])
