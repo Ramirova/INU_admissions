@@ -118,7 +118,7 @@ def profile_details():
     nationality = request.get_json().get('country')
     skype = request.get_json().get('skype')
 
-    candidate = Candidate.query.get(request.get_json().get('login'))
+    candidate = Candidate.query.get(request.args.get('login'))
     if candidate:
         candidate.nationality = nationality
         candidate.skype = skype
