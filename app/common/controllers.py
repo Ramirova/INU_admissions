@@ -30,6 +30,14 @@ from sqlalchemy.exc import SQLAlchemyError
 
 module = Blueprint('api', __name__, url_prefix='/api')
 
+candidate_progress = {
+    'GRADED': 100,
+    'INTERVIEWED': 90,
+    'INTERVIEW_ASSIGNED': 70,
+    'PASSED_TESTS': 50,
+    'PASSING_TESTS': 30,
+    'REGISTERED': 10
+}
 
 @module.route('/login', methods=["POST"])
 def auth():
@@ -78,7 +86,8 @@ def profile_info():
             'surname': candidate.surname,
             'second_name': candidate.second_name,
             'role': 'candidate',
-            'status': candidate.state
+            'status': candidate.state,
+            'progress': candidate_progress[candidate.state]
         }
     if user.role == 'staff_member':
         staff = Staff_member.query.get(request.args.get('login'))
@@ -140,3 +149,4 @@ def download():
     filename = request.args.get('filename')
     uploads = "app/user_files/" + login
     return send_from_directory(directory=uploads, filename=filename)
+
