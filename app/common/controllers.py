@@ -52,9 +52,14 @@ def auth():
                     'refresh_token': create_refresh_token(identity=user.login),
                     'role': user.role
                 }
-                token = Token(user.login, auth_token)
-                db.session.add(token)
-                db.session.commit()
+                if not db.session.query(Token).filter_by(login=user.login).count():
+                    token = Token(user.login, auth_token)
+                    db.session.add(token)
+                    db.session.commit()
+                else:
+                    token = Token.query.get(user.login)
+                    token.token = auth_token
+                    db.session.commit()
                 return make_response(jsonify(response)), 200
             return Response("", status=401, mimetype='application/json')
         else:
