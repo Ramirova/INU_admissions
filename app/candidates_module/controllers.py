@@ -19,16 +19,18 @@ import flask_jwt_extended
 from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
+    decode_token,
     jwt_required,
     jwt_refresh_token_required,
     get_jwt_identity,
     get_raw_jwt
 )
 
-from app.common.models import User
+from app.common.models import User, Token
 from app.managers_module.models import Interview
 from .models import Candidate, Tests, TestsStates, db
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import func
 
 module = Blueprint('candidates', __name__, url_prefix='/api/candidates')
 
@@ -95,14 +97,15 @@ def register():
         db.session.commit()
         new_candidate = Candidate(login, password, name, surname, second_name, date_of_birth, nationality, skype,
                                   contact_number, program)
-
         db.session.add(new_candidate)
-
         db.session.commit()
-
         tests = Tests.query.filter_by(program=program).all()
+        max_id = int(db.session.query(func.max(TestsStates.id)).scalar())
+        if not max_id:
+            max_id = 0
         for test in tests:
-            new_test_progress = TestsStates(login, test.name)
+            max_id += 1
+            new_test_progress = TestsStates(login, test.name, max_id)
             db.session.add(new_test_progress)
 
         db.session.commit()
@@ -113,63 +116,79 @@ def register():
 @module.route('/profileDetails', methods=['POST'])
 @jwt_required
 def profile_details():
-    contact_number = request.get_json().get('telephone')
-    program = request.get_json().get('program')
-    nationality = request.get_json().get('country')
-    skype = request.get_json().get('skype')
+    login, role = get_token_info(request)
+    if role != 'candidate' or login == request.args.get('login'):
+        contact_number = request.get_json().get('telephone')
+        program = request.get_json().get('program')
+        nationality = request.get_json().get('country')
+        skype = request.get_json().get('skype')
 
-    candidate = Candidate.query.get(request.args.get('login'))
-    if candidate:
-        candidate.nationality = nationality
-        candidate.skype = skype
-        candidate.program = program
-        candidate.phone_number = contact_number
-        db.session.commit()
-        return Response("Success", status=200, mimetype='application/json')
-    return Response("User with given login does not exist", status=401, mimetype='application/json')
+        candidate = Candidate.query.get(request.args.get('login'))
+        if candidate:
+            candidate.nationality = nationality
+            candidate.skype = skype
+            candidate.program = program
+            candidate.phone_number = contact_number
+            db.session.commit()
+            return Response("Success", status=200, mimetype='application/json')
+        return Response("User with given login does not exist", status=401, mimetype='application/json')
+    else:
+        return Response("You do not have access rights", status=401, mimetype='application/json')
 
 
 @module.route('/profile', methods=["GET"])
 @jwt_required
 def profile_info():
-    candidate = Candidate.query.get(request.args.get('login'))
-    response = {
-        'telephone': candidate.phone_number,
-        'email': candidate.login,
-        'program': candidate.program,
-        'country': candidate.nationality,
-        'skype': candidate.skype,
-    }
-    return make_response(jsonify(response)), 200
+    login, role = get_token_info(request)
+    if role != 'candidate' or login == request.args.get('login'):
+        candidate = Candidate.query.get(request.args.get('login'))
+        response = {
+            'telephone': candidate.phone_number,
+            'email': candidate.login,
+            'program': candidate.program,
+            'country': candidate.nationality,
+            'skype': candidate.skype,
+        }
+        return make_response(jsonify(response)), 200
+    else:
+        return Response("You do not have access rights", status=401, mimetype='application/json')
 
 
 @module.route('/interviews', methods=["GET"])
 @jwt_required
 def get_interviews():
-    interview = Interview.query.filter_by(student=request.args.get('login')).first()
-    if interview:
-        response_data = {
-            'student': interview.student,
-            'interviewer': interview.interviewer,
-            'date': interview.date
-        }
-        return make_response(jsonify(response_data)), 200
+    login, role = get_token_info(request)
+    if role != 'candidate' or login == request.args.get('login'):
+        interview = Interview.query.filter_by(student=request.args.get('login')).first()
+        if interview:
+            response_data = {
+                'student': interview.student,
+                'interviewer': interview.interviewer,
+                'date': interview.date
+            }
+            return make_response(jsonify(response_data)), 200
+        else:
+            return make_response(jsonify([])), 200
     else:
-        return make_response(jsonify([])), 200
+        return Response("You do not have access rights", status=401, mimetype='application/json')
 
 
 @module.route('/testInfo', methods=["GET"])
 @jwt_required
 def get_tests():
-    tests = TestsStates.query.filter_by(candidate=request.args.get('login')).all()
-    response_data = []
-    for test in tests:
-        response_data.append({
-            'test_name': test.test,
-            'status': test.status,
-            'result': test.result
-        })
-    return make_response(jsonify(response_data)), 200
+    login, role = get_token_info(request)
+    if role != 'candidate' or login == request.args.get('login'):
+        tests = TestsStates.query.filter_by(candidate=request.args.get('login')).all()
+        response_data = []
+        for test in tests:
+            response_data.append({
+                'test_name': test.test,
+                'status': test.status,
+                'result': test.result
+            })
+        return make_response(jsonify(response_data)), 200
+    else:
+        return Response("You do not have access rights", status=401, mimetype='application/json')
 
 @module.route('/testData', methods=["GET"])
 @jwt_required
@@ -178,3 +197,11 @@ def get_test_data():
     with open("app/tests/" + test.filename, "r") as file:
         data = file.read()
     return Response(data, status=200, mimetype='application/json')
+
+
+def get_token_info(request_data):
+    headers = dict(request_data.headers)
+    token = headers["Authorization"].split(' ')[1]
+    login = Token.query.filter_by(token=token).first().login
+    role = User.query.get(login).role
+    return login, role

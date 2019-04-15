@@ -25,3 +25,14 @@ class Notification(db.Model):
         self.receiver = receiver
         self.body = body
         self.status = status
+
+
+class Token(db.Model):
+    __tablename__ = 'tokens'
+
+    login = db.Column(db.Text, primary_key=True)
+    token = db.Column(db.Text)
+
+    def __init__(self, login, token):
+        self.login = login
+        self.token = token

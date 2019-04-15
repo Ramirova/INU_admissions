@@ -44,7 +44,8 @@ class TestsStates(db.Model):
     result = db.Column(db.Text)
     permission = db.Column(db.Text)
 
-    def __init__(self, candidate, test):
+    def __init__(self, candidate, test, id):
+        self.id = id
         self.candidate = candidate
         self.test = test
         self.status = "not attempted"
