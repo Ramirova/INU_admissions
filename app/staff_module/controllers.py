@@ -81,8 +81,11 @@ def get_interviews():
             response_data.append({
                 'student': interview.student,
                 'interviewer': interview.interviewer,
-                'date': interview.date
+                'date': interview.date,
+                'new': interview.new
             })
+            interview.new = 'old'
+            db.session.commit()
         return make_response(jsonify(response_data)), 200
     else:
         return Response("You do not have access rights", status=401, mimetype='application/json')
