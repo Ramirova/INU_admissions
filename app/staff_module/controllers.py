@@ -22,7 +22,9 @@ from flask_jwt_extended import (
 )
 
 from app.managers_module.models import Interview
+from app.candidates_module.models import Candidate
 from .models import Staff_member, db
+from app.candidates_module.controllers import get_token_info
 from sqlalchemy.exc import SQLAlchemyError
 
 module = Blueprint('staff', __name__, url_prefix='/api/staff')
@@ -71,12 +73,29 @@ def get_profile_info():
 @module.route('/interviews', methods=["GET"])
 @jwt_required
 def get_interviews():
-    interviews = Interview.query.filter_by(interviewer=request.args.get('login')).all()
-    response_data = []
-    for interview in interviews:
-        response_data.append({
-            'student': interview.student,
-            'interviewer': interview.interviewer,
-            'date': interview.date
-        })
-    return make_response(jsonify(response_data)), 200
+    login, user_role = get_token_info(request)
+    if user_role == 'staff_member':
+        interviews = Interview.query.filter_by(interviewer=request.args.get('login')).all()
+        response_data = []
+        for interview in interviews:
+            response_data.append({
+                'student': interview.student,
+                'interviewer': interview.interviewer,
+                'date': interview.date
+            })
+        return make_response(jsonify(response_data)), 200
+    else:
+        return Response("You do not have access rights", status=401, mimetype='application/json')
+
+
+@module.route('/grade', methods=["POST"])
+@jwt_required
+def grade_student():
+    login, user_role = get_token_info(request)
+    if user_role == 'staff_member':
+        candidate = Candidate.query.filter_by(login=request.get_json().get('student_login')).first()
+        candidate.grade = request.get_json().get('grade')
+        db.session.commit()
+        return Response("Success", status=200, mimetype='application/json')
+    else:
+        return Response("You do not have access rights", status=401, mimetype='application/json')

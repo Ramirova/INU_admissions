@@ -253,9 +253,25 @@ def handle_test_attempt(login, test_name, result):
             candidate.grade = "T"
     db.session.commit()
 
+
 def get_token_info(request_data):
     headers = dict(request_data.headers)
     token = headers["Authorization"].split(' ')[1]
     login = Token.query.filter_by(token=token).first().login
     role = User.query.get(login).role
     return login, role
+
+
+@module.route('/grades', methods=["GET"])
+@jwt_required
+def get_test_grades():
+    user_login, user_role = get_token_info(request)
+
+    if user_login == request.get_json().get('login') or user_role == 'manager' or user_role == 'staff_member':
+        test_states = TestsStates.query.filter_by(candidate=request.get_json().get('login')).all()
+        result = {}
+        for test_state in test_states:
+            result[test_state.test] = test_state.result
+        return make_response(jsonify(result)), 200
+    else:
+        return Response("You do not have access rights", status=401, mimetype='application/json')
