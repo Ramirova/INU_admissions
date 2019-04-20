@@ -198,6 +198,60 @@ def get_test_data():
         data = file.read()
     return Response(data, status=200, mimetype='application/json')
 
+@module.route('/testResults', methods=["POST"])
+@jwt_required
+def uploadTestResults():
+    user_login, user_role = get_token_info(request)
+
+    if user_login == request.get_json().get('login'):
+        test = Tests.query.filter_by(name=request.get_json().get('testName')).first()
+        if not test:
+            return Response("There is no test for given parameters", status=401, mimetype='application/json')
+        if not is_test_available(user_login, test.name):
+            return Response("Test already attempted or not available", status=401, mimetype='application/json')
+        right_answers = ""
+        with open("app/tests/" + test.filename[:-4] + "Answers.txt", "r") as file:
+            right_answers = file.read().splitlines()
+        user_answers = request.get_json().get('answers')
+        score = 0
+        for i, answer in enumerate(user_answers):
+            if str(answer) == right_answers[i]:
+                score += 1
+        result = int(100 * score / len(user_answers))
+        handle_test_attempt(user_login, test.name, result)
+        return Response(str(result), status=200, mimetype='application/json')
+    else:
+        return Response("You do not have access rights", status=401, mimetype='application/json')
+
+
+def is_test_available(login, test_name):
+    test_states = TestsStates.query.filter_by(candidate=login).all()
+    for test_state in test_states:
+        if test_state.test == test_name and test_state.status == "not attempted":
+            return True
+    return False
+
+
+def handle_test_attempt(login, test_name, result):
+    test_states = TestsStates.query.filter_by(candidate=login).all()
+    successful_results = 0
+    attempted_tests = 0
+    for testState in test_states:
+        if testState.test == test_name:
+            testState.status = "graded"
+            testState.result = result
+        if float(testState.result) > 80:
+            successful_results += 1
+        if testState.status == "graded":
+            attempted_tests += 1
+    if attempted_tests == len(test_states):
+        candidate = Candidate.query.get(request.get_json().get('login'))
+        if successful_results == len(test_states):
+            candidate.state = "PASSED_TESTS"
+        else:
+            candidate.state = "GRADED"
+            candidate.grade = "T"
+    db.session.commit()
 
 def get_token_info(request_data):
     headers = dict(request_data.headers)
