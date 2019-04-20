@@ -23,10 +23,13 @@ class Interview(db.Model):
     student = db.Column(db.String(50))
     interviewer = db.Column(db.String(50))
     date = db.Column(db.Date)
+    new = db.Column(db.Text)
 
-    def __init__(self, student, interviewer, date):
+    def __init__(self, student, interviewer, date, id):
         self.student = student
+        self.id = id
         self.interviewer = interviewer
         self.date = date
+        self.new = "new"
 
 

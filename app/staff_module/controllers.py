@@ -26,7 +26,7 @@ from app.candidates_module.models import Candidate
 from .models import Staff_member, db
 from app.candidates_module.controllers import get_token_info
 from sqlalchemy.exc import SQLAlchemyError
-
+from sqlalchemy import func
 module = Blueprint('staff', __name__, url_prefix='/api/staff')
 
 
@@ -75,7 +75,7 @@ def get_profile_info():
 def get_interviews():
     login, user_role = get_token_info(request)
     if user_role == 'staff_member':
-        interviews = Interview.query.filter_by(interviewer=request.args.get('login')).all()
+        interviews = Interview.query.filter_by(interviewer=request.get_json().get('login')).all()
         response_data = []
         for interview in interviews:
             response_data.append({
@@ -97,5 +97,26 @@ def grade_student():
         candidate.grade = request.get_json().get('grade')
         db.session.commit()
         return Response("Success", status=200, mimetype='application/json')
+    else:
+        return Response("You do not have access rights", status=401, mimetype='application/json')
+
+
+@module.route('/newInterviews', methods=["GET"])
+@jwt_required
+def get_new_interviews():
+    login, user_role = get_token_info(request)
+    if user_role == 'staff_member':
+        interviews = Interview.query.filter_by(interviewer=request.get_json().get('login')).all()
+        response_data = []
+        for interview in interviews:
+            if interview.new == 'new':
+                response_data.append({
+                    'student': interview.student,
+                    'interviewer': interview.interviewer,
+                    'date': interview.date
+                })
+                interview.new = 'old'
+        db.session.commit()
+        return make_response(jsonify(response_data)), 200
     else:
         return Response("You do not have access rights", status=401, mimetype='application/json')

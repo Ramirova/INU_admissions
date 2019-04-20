@@ -27,7 +27,7 @@ from app.candidates_module.controllers import get_token_info
 from app.staff_module.models import Staff_member
 from .models import Manager, Interview, db
 from sqlalchemy.exc import SQLAlchemyError
-
+from sqlalchemy import func
 module = Blueprint('managers', __name__, url_prefix='/api/managers')
 
 
@@ -123,9 +123,14 @@ def create_interview():
         candidate = request.get_json().get('candidate')
         staff_member = request.get_json().get('staff_member')
         date = request.get_json().get('date')
-        interview = Interview(candidate, staff_member, date)
+
+        max_inerview_id = db.session.query(func.max(Interview.id)).scalar()
+        max_id = 0
+        if max_inerview_id:
+            max_id = int(max_inerview_id) + 1
+        interview = Interview(candidate, staff_member, date, max_id+1)
         db.session.add(interview)
-        db.commit()
-        return make_response(""), 200
+        db.session.commit()
+        return make_response("Success"), 200
     else:
         return Response("You do not have access rights", status=401, mimetype='application/json')
