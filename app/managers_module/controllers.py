@@ -79,10 +79,13 @@ def update_candidate_status():
 @module.route('/users', methods=["GET"])
 @jwt_required
 def get_users():
-    role = request.args.get('role')
+    role = request.get_json().get('role')
     result_data = []
     if role == 'candidate':
-        for user in Candidate.query.all():
+        candidates = Candidate.query.all()
+        if request.get_json().get('status'):
+            candidates = Candidate.query.filter_by(state=request.get_json().get('status'))
+        for user in candidates:
             result_data.append({
                 'login': user.login,
                 'name': user.name,
