@@ -74,6 +74,8 @@ def get_profile_info():
 @jwt_required
 def get_interviews():
     login, user_role = get_token_info(request)
+    if login == "User not authorized":
+        return Response("Token expired", status=401, mimetype='application/json')
     if user_role == 'staff_member':
         interviews = Interview.query.filter_by(interviewer=request.args.get('login')).all()
         response_data = []
@@ -95,6 +97,8 @@ def get_interviews():
 @jwt_required
 def grade_student():
     login, user_role = get_token_info(request)
+    if login == "User not authorized":
+        return Response("Token expired", status=401, mimetype='application/json')
     if user_role == 'staff_member':
         candidate = Candidate.query.filter_by(login=request.get_json().get('student_login')).first()
         candidate.grade = request.get_json().get('grade')
@@ -108,6 +112,8 @@ def grade_student():
 @jwt_required
 def get_new_interviews():
     login, user_role = get_token_info(request)
+    if login == "User not authorized":
+        return Response("Token expired", status=401, mimetype='application/json')
     if user_role == 'staff_member':
         interviews = Interview.query.filter_by(interviewer=request.get_json().get('login')).all()
         response_data = []

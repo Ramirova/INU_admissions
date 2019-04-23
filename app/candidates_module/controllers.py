@@ -257,9 +257,13 @@ def handle_test_attempt(login, test_name, result):
 def get_token_info(request_data):
     headers = dict(request_data.headers)
     token = headers["Authorization"].split(' ')[1]
-    login = Token.query.filter_by(token=token).first().login
-    role = User.query.get(login).role
-    return login, role
+    tokens = Token.query.filter_by(token=token)
+    if tokens.first():
+        login = tokens.first().login
+        role = User.query.get(login).role
+        return login, role
+    else:
+        return "User not authorized", -1
 
 
 @module.route('/grades', methods=["GET"])

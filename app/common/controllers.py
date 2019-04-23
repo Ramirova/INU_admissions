@@ -87,6 +87,8 @@ def refresh():
 @jwt_required
 def profile_info():
     login, role = get_token_info(request)
+    if login == "User not authorized":
+        return Response("Token expired", status=401, mimetype='application/json')
     user = User.query.get(request.args.get('login'))
     if user.role == 'candidate' and login == request.args.get('login'):
         candidate = Candidate.query.get(request.args.get('login'))
@@ -125,6 +127,8 @@ def profile_info():
 @jwt_required
 def change_profile_info():
     real_login, role = get_token_info(request)
+    if real_login == "User not authorized":
+        return Response("Token expired", status=401, mimetype='application/json')
     login = request.args.get('login')
     user = User.query.get(login)
     if user.role == 'candidate' and real_login == request.args.get('login'):
@@ -152,6 +156,8 @@ def change_profile_info():
 @jwt_required
 def get_notifications():
     real_login, role = get_token_info(request)
+    if real_login == "User not authorized":
+        return Response("Token expired", status=401, mimetype='application/json')
     if real_login == request.args.get('login'):
         notifications = Notification.query.filter_by(receiver=request.args.get('login')).all()
         response_data = []
@@ -170,6 +176,8 @@ def get_notifications():
 @jwt_required
 def download():
     real_login, role = get_token_info(request)
+    if real_login == "User not authorized":
+        return Response("Token expired", status=401, mimetype='application/json')
     if real_login == request.args.get('login'):
         login = request.args.get('login')
         filename = request.args.get('filename')

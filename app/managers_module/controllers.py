@@ -62,6 +62,8 @@ module = Blueprint('managers', __name__, url_prefix='/api/managers')
 @jwt_required
 def update_candidate_status():
     login, role = get_token_info(request)
+    if login == "User not authorized":
+        return Response("Token expired", status=401, mimetype='application/json')
     if role == 'manager':
         candidate = Candidate.query.get(request.get_json().get('login'))
         status = request.get_json().get('status')
@@ -85,6 +87,8 @@ def update_candidate_status():
 @jwt_required
 def get_users():
     login, user_role = get_token_info(request)
+    if login == "User not authorized":
+        return Response("Token expired", status=401, mimetype='application/json')
     if user_role == 'manager':
         role = request.get_json().get('role')
         result_data = []
@@ -119,6 +123,8 @@ def get_users():
 @jwt_required
 def create_interview():
     login, user_role = get_token_info(request)
+    if login == "User not authorized":
+        return Response("Token expired", status=401, mimetype='application/json')
     if user_role == 'manager':
         candidate = request.get_json().get('candidate')
         staff_member = request.get_json().get('staff_member')
