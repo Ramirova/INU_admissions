@@ -75,7 +75,7 @@ def get_profile_info():
 def get_interviews():
     login, user_role = get_token_info(request)
     if user_role == 'staff_member':
-        interviews = Interview.query.filter_by(interviewer=request.get_json().get('login')).all()
+        interviews = Interview.query.filter_by(interviewer=request.args.get('login')).all()
         response_data = []
         for interview in interviews:
             response_data.append({
