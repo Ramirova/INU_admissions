@@ -90,7 +90,7 @@ def get_interviews():
             db.session.commit()
         return make_response(jsonify(response_data)), 200
     else:
-        return Response("You do not have access rights", status=401, mimetype='application/json')
+        return Response("You do not have access rights, you are: " + user_role + ", but should be staff member", status=401, mimetype='application/json')
 
 
 @module.route('/grade', methods=["POST"])
