@@ -90,8 +90,16 @@ def profile_info():
     if login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')
     user = User.query.get(request.args.get('login'))
-    if user.role == 'candidate' and login == request.args.get('login'):
-        candidate = Candidate.query.get(request.args.get('login'))
+    response_data = get_profile_info(user)
+    if response_data and login == request.args.get('login'):
+        return make_response(jsonify(response_data)), 200
+    else:
+        return Response("You do not have access rights", status=401, mimetype='application/json')
+
+
+def get_profile_info(user):
+    if user.role == 'candidate':
+        candidate = Candidate.query.get(user.login)
         response_data = {
             'name': candidate.name,
             'surname': candidate.surname,
@@ -101,26 +109,26 @@ def profile_info():
             'progress': candidate_progress[candidate.state],
             'photo': "app/user_files/sample_photo.png"
         }
-        return make_response(jsonify(response_data)), 200
-    if user.role == 'staff_member' and login == request.args.get('login'):
-        staff = Staff_member.query.get(request.args.get('login'))
+        return response_data
+    if user.role == 'staff_member':
+        staff = Staff_member.query.get(user.login)
         response_data = {
             'name': staff.name,
             'surname': staff.surname,
             'second_name': staff.second_name,
             'role': 'staff_member'
         }
-        return make_response(jsonify(response_data)), 200
-    if user.role == 'manager' and login == request.args.get('login'):
-        manager = Manager.query.get(request.args.get('login'))
+        return response_data
+    if user.role == 'manager':
+        manager = Manager.query.get(user.login)
         response_data = {
             'name': manager.name,
             'surname': manager.surname,
             'second_name': manager.second_name,
             'role': 'manager'
         }
-        return make_response(jsonify(response_data)), 200
-    return Response("You do not have access rights", status=401, mimetype='application/json')
+        return response_data
+    return None
 
 
 @module.route('/changeProfile', methods=["POST"])

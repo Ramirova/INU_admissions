@@ -190,6 +190,7 @@ def get_tests():
     else:
         return Response("You do not have access rights", status=401, mimetype='application/json')
 
+
 @module.route('/testData', methods=["GET"])
 @jwt_required
 def get_test_data():
@@ -197,6 +198,7 @@ def get_test_data():
     with open("app/tests/" + test.filename, "r") as file:
         data = file.read()
     return Response(data, status=200, mimetype='application/json')
+
 
 @module.route('/testResults', methods=["POST"])
 @jwt_required

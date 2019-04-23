@@ -23,7 +23,9 @@ from flask_jwt_extended import (
 
 from app.managers_module.models import Interview
 from app.candidates_module.models import Candidate
+from app.common.controllers import get_profile_info
 from .models import Staff_member, db
+from app.common.models import User
 from app.candidates_module.controllers import get_token_info
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
@@ -60,7 +62,7 @@ def refresh():
 
 @module.route('/profile', methods=["GET"])
 @jwt_required
-def get_profile_info():
+def get_profile():
     user = Staff_member.query.get(request.args.get('login'))
     response = {
         'name': user.name,
@@ -80,9 +82,11 @@ def get_interviews():
         interviews = Interview.query.filter_by(interviewer=request.args.get('login')).all()
         response_data = []
         for interview in interviews:
+            candidate = User.query.get(interview.student)
+            interviewer = User.query.get(interview.interviewer)
             response_data.append({
-                'student': interview.student,
-                'interviewer': interview.interviewer,
+                'student': get_profile_info(candidate),
+                'interviewer': get_profile_info(interviewer),
                 'date': interview.date,
                 'new': interview.new
             })
