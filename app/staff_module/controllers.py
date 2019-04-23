@@ -106,6 +106,7 @@ def grade_student():
     if user_role == 'staff_member':
         candidate = Candidate.query.filter_by(login=request.get_json().get('student_login')).first()
         candidate.grade = request.get_json().get('grade')
+        candidate.state = "GRADED"
         db.session.commit()
         return Response("Success", status=200, mimetype='application/json')
     else:
