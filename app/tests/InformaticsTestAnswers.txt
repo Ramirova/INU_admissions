@@ -1,4 +1,7 @@
-1
-2
-3
 4
+5
+2
+32
+173
+true false true false
+false true true false
