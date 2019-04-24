@@ -135,6 +135,7 @@ def create_interview():
         if max_inerview_id:
             max_id = int(max_inerview_id) + 1
         interview = Interview(candidate, staff_member, date, max_id+1)
+        candidate.state = "INTERVIEW_ASSIGNED"
         db.session.add(interview)
         db.session.commit()
         return make_response("Success"), 200
