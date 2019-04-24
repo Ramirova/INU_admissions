@@ -90,12 +90,12 @@ def get_users():
     if login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')
     if user_role == 'manager':
-        role = request.get_json().get('role')
+        role = request.args.get('role')
         result_data = []
         if role == 'candidate':
             candidates = Candidate.query.all()
-            if request.get_json().get('status'):
-                candidates = Candidate.query.filter_by(state=request.get_json().get('status'))
+            if request.args.get('status'):
+                candidates = Candidate.query.filter_by(state=request.args.get('status'))
             for user in candidates:
                 result_data.append({
                     'login': user.login,
