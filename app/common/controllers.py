@@ -45,22 +45,26 @@ def auth():
     user = User.query.get(request.get_json().get('login'))
     if user:
         if user.password == request.get_json().get('password'):
-            auth_token = create_access_token(identity=user.login)
-            if auth_token:
+            if db.session.query(Token).filter_by(login=user.login).count():
+                token = Token.query.get(user.login)
                 response = {
-                    'token': auth_token,
+                    'token': token.token,
                     'refresh_token': create_refresh_token(identity=user.login),
                     'role': user.role
                 }
-                if not db.session.query(Token).filter_by(login=user.login).count():
+                return make_response(jsonify(response)), 200
+            else:
+                auth_token = create_access_token(identity=user.login)
+                if auth_token:
+                    response = {
+                        'token': auth_token,
+                        'refresh_token': create_refresh_token(identity=user.login),
+                        'role': user.role
+                    }
                     token = Token(user.login, auth_token)
                     db.session.add(token)
                     db.session.commit()
-                else:
-                    token = Token.query.get(user.login)
-                    token.token = auth_token
-                    db.session.commit()
-                return make_response(jsonify(response)), 200
+                    return make_response(jsonify(response)), 200
             return Response("", status=401, mimetype='application/json')
         else:
             return Response("Wrong password", status=401, mimetype='application/json')
