@@ -1,12 +1,6 @@
 from flask import (
     Blueprint,
-    render_template,
     request,
-    flash,
-    abort,
-    redirect,
-    url_for,
-    current_app,
     Response,
     jsonify,
     make_response
@@ -18,7 +12,6 @@ from flask_jwt_extended import (
     jwt_required,
     jwt_refresh_token_required,
     get_jwt_identity,
-    get_raw_jwt
 )
 
 from app.managers_module.models import Interview
@@ -27,8 +20,6 @@ from app.common.controllers import get_profile_info
 from .models import Staff_member, db
 from app.common.models import User
 from app.candidates_module.controllers import get_token_info
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import func
 module = Blueprint('staff', __name__, url_prefix='/api/staff')
 
 

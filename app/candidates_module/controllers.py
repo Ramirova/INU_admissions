@@ -1,42 +1,25 @@
 from flask import (
     Blueprint,
-    render_template,
     request,
-    flash,
-    abort,
-    redirect,
-    url_for,
-    current_app,
     Response,
     jsonify,
     make_response
 )
-# import app
 import os
 from app import app
 from werkzeug.utils import secure_filename
-from flask_mail import Mail, Message
-import flask_jwt_extended
-from flask_jwt_extended import (
-    create_access_token,
-    create_refresh_token,
-    decode_token,
-    jwt_required,
-    jwt_refresh_token_required,
-    get_jwt_identity,
-    get_raw_jwt
-)
+from flask_mail import Message
+from flask_jwt_extended import jwt_required
 from threading import Thread
 from app.common.models import User, Token
 from app.managers_module.models import Interview
 from .models import Candidate, Tests, TestsStates, db
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
 from app.email import mail
 
 module = Blueprint('candidates', __name__, url_prefix='/api/candidates')
 
-ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 
 
 @module.route('/upload', methods=['POST'])
@@ -187,7 +170,7 @@ def get_test_data():
 
 @module.route('/testResults', methods=["POST"])
 @jwt_required
-def uploadTestResults():
+def upload_test_results():
     user_login, user_role = get_token_info(request)
 
     if user_login == request.get_json().get('login'):
@@ -196,7 +179,6 @@ def uploadTestResults():
             return Response("There is no test for given parameters", status=401, mimetype='application/json')
         if not is_test_available(user_login, test.name):
             return Response("Test already attempted or not available", status=401, mimetype='application/json')
-        right_answers = ""
         with open("app/tests/" + test.filename[:-4] + "Answers.txt", "r") as file:
             right_answers = file.read().splitlines()
         user_answers = request.get_json().get('answers')
@@ -234,7 +216,8 @@ def handle_test_attempt(login, test_name, result):
     if attempted_tests == len(test_states):
         candidate = Candidate.query.get(request.get_json().get('login'))
         if successful_results == len(test_states):
-            send_message(login, "Your status updated", "Your status updated to: " + "PASSED TESTS. Now you will be assigned for interview")
+            send_message(login, "Your status updated", "Your status updated to: " +
+                         "PASSED TESTS. Now you will be assigned for interview")
             candidate.state = "PASSED_TESTS"
         else:
             candidate.state = "GRADED"

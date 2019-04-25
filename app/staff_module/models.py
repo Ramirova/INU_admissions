@@ -1,5 +1,6 @@
 from app.database import db
 
+
 class Staff_member(db.Model):
     __tablename__ = 'staff'
 

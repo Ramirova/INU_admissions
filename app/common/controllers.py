@@ -1,12 +1,6 @@
 from flask import (
     Blueprint,
-    render_template,
     request,
-    flash,
-    abort,
-    redirect,
-    url_for,
-    current_app,
     Response,
     jsonify,
     make_response,
@@ -18,16 +12,14 @@ from flask_jwt_extended import (
     create_refresh_token,
     jwt_required,
     jwt_refresh_token_required,
-    get_jwt_identity,
-    get_raw_jwt
+    get_jwt_identity
 )
 
 from .models import User, Notification, Token, db
 from app.candidates_module.models import Candidate
 from app.staff_module.models import Staff_member
 from app.managers_module.models import Manager
-from app.candidates_module.controllers import get_token_info, send_message
-from sqlalchemy.exc import SQLAlchemyError
+from app.candidates_module.controllers import get_token_info
 
 module = Blueprint('api', __name__, url_prefix='/api')
 
@@ -39,6 +31,7 @@ candidate_progress = {
     'PASSING_TESTS': 30,
     'REGISTERED': 10
 }
+
 
 @module.route('/login', methods=["POST"])
 def auth():
@@ -163,6 +156,7 @@ def change_profile_info():
         db.session.commit()
         return Response("Success", status=200, mimetype='application/json')
     return Response("You do not have access rights", status=401, mimetype='application/json')
+
 
 @module.route('/getNotifications', methods=["GET"])
 @jwt_required

@@ -1,5 +1,6 @@
 from app.database import db, JsonModel
 
+
 class Candidate(db.Model, JsonModel):
     __tablename__ = 'candidates'
 
