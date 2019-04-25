@@ -7,8 +7,9 @@ from flask_jwt_extended import (
 )
 from .email import mail
 
-
+app = None
 def create_app():
+    global app
     app = Flask(__name__)
     app.config.from_object(os.environ['APP_SETTINGS'])
 

@@ -11,8 +11,9 @@ from flask import (
     jsonify,
     make_response
 )
-import app
+# import app
 import os
+from app import app
 from werkzeug.utils import secure_filename
 from flask_mail import Mail, Message
 import flask_jwt_extended

@@ -44,7 +44,6 @@ candidate_progress = {
 def auth():
     user = User.query.get(request.get_json().get('login'))
     if user:
-        send_message("r.amirova@innopolis.ru", "Hello!", "Message from INU admissions")
         if user.password == request.get_json().get('password'):
             if db.session.query(Token).filter_by(login=user.login).count():
                 token = Token.query.get(user.login)
