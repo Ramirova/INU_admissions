@@ -208,7 +208,8 @@ def get_test_data():
 @jwt_required
 def upload_test_results():
     """
-    Method for uploading test answers for the server and getting grade. Method checks every answer and returns grade for the test.
+    Method for uploading test answers for the server and getting grade. Method checks every answer and returns grade
+    for the test.
     :return: grade for the test
     """
     user_login, user_role = get_token_info(request)

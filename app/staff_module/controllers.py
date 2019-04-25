@@ -6,13 +6,7 @@ from flask import (
     make_response
 )
 
-from flask_jwt_extended import (
-    create_access_token,
-    create_refresh_token,
-    jwt_required,
-    jwt_refresh_token_required,
-    get_jwt_identity,
-)
+from flask_jwt_extended import jwt_required
 
 from app.managers_module.models import Interview
 from app.candidates_module.models import Candidate
@@ -66,7 +60,8 @@ def get_interviews():
             db.session.commit()
         return make_response(jsonify(response_data)), 200
     else:
-        return Response("You do not have access rights, you are: " + user_role + ", but should be staff member", status=401, mimetype='application/json')
+        return Response("You do not have access rights, you are: " + user_role + ", but should be staff member",
+                        status=401, mimetype='application/json')
 
 
 @module.route('/grade', methods=["POST"])

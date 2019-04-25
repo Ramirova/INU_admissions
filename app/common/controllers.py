@@ -69,7 +69,6 @@ def auth():
         return Response("Wrong login", status=401, mimetype='application/json')
 
 
-
 @module.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 def refresh():
