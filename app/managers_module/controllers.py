@@ -21,9 +21,9 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_raw_jwt
 )
-
+from flask_mail import Mail, Message
 from app.candidates_module.models import Candidate, TestsStates
-from app.candidates_module.controllers import get_token_info
+from app.candidates_module.controllers import get_token_info, send_message
 from app.staff_module.models import Staff_member
 from .models import Manager, Interview, db
 from sqlalchemy.exc import SQLAlchemyError
@@ -139,6 +139,8 @@ def create_interview():
         candidate_user.state = "INTERVIEW_ASSIGNED"
         db.session.add(interview)
         db.session.commit()
+        body = "You have been assigned for the interview. It will be on " + date
+        send_message(candidate, "You have been assigned for the interview.", body)
         return make_response("Success"), 200
     else:
         return Response("You do not have access rights", status=401, mimetype='application/json')
