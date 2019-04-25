@@ -88,7 +88,8 @@ def get_interviews():
                 'student': get_profile_info(candidate),
                 'interviewer': get_profile_info(interviewer),
                 'date': interview.date,
-                'new': interview.new
+                'new': interview.new,
+                'student_login': candidate.login
             })
             interview.new = 'old'
             db.session.commit()
