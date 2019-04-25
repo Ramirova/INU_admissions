@@ -18,6 +18,10 @@ module = Blueprint('managers', __name__, url_prefix='/api/managers')
 @module.route('/updateStatus', methods=['POST'])
 @jwt_required
 def update_candidate_status():
+    """
+    Method for updating candidate's status
+    :return: 200 if status is updates; 401 if user do not have access rights
+    """
     login, role = get_token_info(request)
     if login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')
@@ -43,6 +47,10 @@ def update_candidate_status():
 @module.route('/users', methods=["GET"])
 @jwt_required
 def get_users():
+    """
+    Method returns list of particular type of users
+    :return: candidates for a given status and all staff members
+    """
     login, user_role = get_token_info(request)
     if login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')
@@ -79,6 +87,10 @@ def get_users():
 @module.route('/interview', methods=["POST"])
 @jwt_required
 def create_interview():
+    """
+    Method allows managers to create an interview for a given date and time, professor and student
+    :return: 200 if interview is created; 401 if user do not have access rights
+    """
     login, user_role = get_token_info(request)
     if login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')

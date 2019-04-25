@@ -25,6 +25,10 @@ ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 @module.route('/upload', methods=['POST'])
 @jwt_required
 def upload_file():
+    """
+    This methods allows users upload file. They need to specify in JSON login and file name
+    :return: 200 if everything is OK and other standard status codes otherwise
+    """
     candidate = Candidate.query.get(request.get_json().get('login'))
     if 'file' not in request.files:
         return 'No file part'
@@ -34,15 +38,27 @@ def upload_file():
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file.save(os.path.join("app/user_files/", candidate.login, filename))
-    return Response("", status=200, mimetype='application/json')
+        return Response("", status=200, mimetype='application/json')
+    else:
+        return Response("Invalid filename", status=401, mimetype='application/json')
 
 
 def allowed_file(filename):
+    """
+    Checks whether filename is legal
+    :param filename: name of file than needs to be checked
+    :return: true if file name is legal and false otherwise
+    """
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @module.route('/register', methods=['POST'])
 def register():
+    """
+    POST method which allows to register new user. In JSON should be specified all the information about new user:
+    login, password, name, surname, second_name, date_of_birth, nationality, skype, contact_number, program
+    :return: 200 if user registered; 401 if user exists and other standard status codes otherwise
+    """
     login = request.get_json().get('login')
     password = request.get_json().get('password')
     name = request.get_json().get('name')
@@ -84,6 +100,10 @@ def register():
 @module.route('/profileDetails', methods=['POST'])
 @jwt_required
 def profile_details():
+    """
+    POST methods allows users to change profile details
+    :return: 200 if everything is ok; 401 if user with given login exists and 402 if user do not have access rights
+    """
     login, role = get_token_info(request)
     if role != 'candidate' or login == request.args.get('login'):
         contact_number = request.get_json().get('telephone')
@@ -101,12 +121,16 @@ def profile_details():
             return Response("Success", status=200, mimetype='application/json')
         return Response("User with given login does not exist", status=401, mimetype='application/json')
     else:
-        return Response("You do not have access rights", status=401, mimetype='application/json')
+        return Response("You do not have access rights", status=402, mimetype='application/json')
 
 
 @module.route('/profile', methods=["GET"])
 @jwt_required
 def profile_info():
+    """
+    Method returns profile information for a requested user
+    :return: 200 and json with profile information if everything is ok; 401 if user do not have access rights
+    """
     login, role = get_token_info(request)
     if role != 'candidate' or login == request.args.get('login'):
         candidate = Candidate.query.get(request.args.get('login'))
@@ -125,6 +149,10 @@ def profile_info():
 @module.route('/interviews', methods=["GET"])
 @jwt_required
 def get_interviews():
+    """
+    Method returns interviews assigned for a perticular user (candidate or staff meber)
+    :return: 200 and json with interview if everything is ok; 401 if user do not have access rights
+    """
     login, role = get_token_info(request)
     if role != 'candidate' or login == request.args.get('login'):
         interview = Interview.query.filter_by(student=request.args.get('login')).first()
@@ -144,6 +172,10 @@ def get_interviews():
 @module.route('/testInfo', methods=["GET"])
 @jwt_required
 def get_tests():
+    """
+    Method for getting statuses of test assigned to candidate
+    :return: statuses of test assigned to candidate
+    """
     login, role = get_token_info(request)
     if role != 'candidate' or login == request.args.get('login'):
         tests = TestsStates.query.filter_by(candidate=request.args.get('login')).all()
@@ -162,6 +194,10 @@ def get_tests():
 @module.route('/testData', methods=["GET"])
 @jwt_required
 def get_test_data():
+    """
+    Method for accessing test questions and answer possibilities (for single and multiple choice questions)
+    :return: JSON with test
+    """
     test = Tests.query.filter_by(name=request.args.get('test_name')).first()
     with open("app/tests/" + test.filename, "r") as file:
         data = file.read()
@@ -171,6 +207,10 @@ def get_test_data():
 @module.route('/testResults', methods=["POST"])
 @jwt_required
 def upload_test_results():
+    """
+    Method for uploading test answers for the server and getting grade. Method checks every answer and returns grade for the test.
+    :return: grade for the test
+    """
     user_login, user_role = get_token_info(request)
 
     if user_login == request.get_json().get('login'):
@@ -202,6 +242,12 @@ def is_test_available(login, test_name):
 
 
 def handle_test_attempt(login, test_name, result):
+    """
+    Methods checks whether user's status need to be changed after test and sends email to his/her mail
+    :param login: login of user
+    :param test_name: name of test needs to be checked
+    :param result: grade for the test
+    """
     test_states = TestsStates.query.filter_by(candidate=login).all()
     successful_results = 0
     attempted_tests = 0
@@ -227,11 +273,21 @@ def handle_test_attempt(login, test_name, result):
 
 
 def send_async_email(msg):
+    """
+    Mehod sends email message asynchronously
+    :param msg: message object
+    """
     with app.app_context():
         mail.send(msg)
 
 
 def send_message(to, msg, body):
+    """
+    Mehod redirects sending email message in other thread
+    :param to: recepient
+    :param msg: message theme
+    :param body: message body
+    """
     msg = Message(msg, sender='rozaliya_amirova@bk.ru', recipients=[to])
     msg.body = body
     thr = Thread(target=send_async_email, args=[msg])
@@ -239,6 +295,11 @@ def send_message(to, msg, body):
 
 
 def get_token_info(request_data):
+    """
+    Method checks whether token in request is valid
+    :param request_data: requests
+    :return: login of user and role or error if token is invalid
+    """
     headers = dict(request_data.headers)
     token = headers["Authorization"].split(' ')[1]
     tokens = Token.query.filter_by(token=token)
@@ -253,6 +314,10 @@ def get_token_info(request_data):
 @module.route('/grades', methods=["GET"])
 @jwt_required
 def get_test_grades():
+    """
+    Method returns grades for a given student. Login of student should be specified in body - JSON
+    :return: 200 if OK; 401 if user do not have acces rights
+    """
     user_login, user_role = get_token_info(request)
 
     if user_login == request.get_json().get('login') or user_role == 'manager' or user_role == 'staff_member':

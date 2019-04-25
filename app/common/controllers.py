@@ -35,6 +35,10 @@ candidate_progress = {
 
 @module.route('/login', methods=["POST"])
 def auth():
+    """
+    Method gets login and password from JSON from request body and authorizes user
+    :return: access toke, refresh token and user role if login and password are ok and standard errors otherwise
+    """
     user = User.query.get(request.get_json().get('login'))
     if user:
         if user.password == request.get_json().get('password'):
@@ -65,14 +69,18 @@ def auth():
         return Response("Wrong login", status=401, mimetype='application/json')
 
 
-# The jwt_refresh_token_required decorator insures a valid refresh
-# token is present in the request before calling this endpoint. We
-# can use the get_jwt_identity() function to get the identity of
-# the refresh token, and use the create_access_token() function again
-# to make a new access token for this identity.
+
 @module.route('/refresh', methods=['POST'])
 @jwt_refresh_token_required
 def refresh():
+    """
+    The jwt_refresh_token_required decorator insures a valid refresh
+    token is present in the request before calling this endpoint. We
+    can use the get_jwt_identity() function to get the identity of
+    the refresh token, and use the create_access_token() function again
+    to make a new access token for this identity.
+    :return: new access token
+    """
     current_user = get_jwt_identity()
     ret = {
         'access_token': create_access_token(identity=current_user)
@@ -83,6 +91,10 @@ def refresh():
 @module.route('/profile', methods=["GET"])
 @jwt_required
 def profile_info():
+    """
+    Method returns profile information for a requested user
+    :return: 200 and json with profile information if everything is ok; 401 if user do not have access rights
+    """
     login, role = get_token_info(request)
     if login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')
@@ -95,6 +107,11 @@ def profile_info():
 
 
 def get_profile_info(user):
+    """
+    Method collect all profile info for different types of users
+    :param user: user for whom we need to collect profile info
+    :return: profile info
+    """
     if user.role == 'candidate':
         candidate = Candidate.query.get(user.login)
         response_data = {
@@ -131,6 +148,10 @@ def get_profile_info(user):
 @module.route('/changeProfile', methods=["POST"])
 @jwt_required
 def change_profile_info():
+    """
+    POST methods allows users to change profile information
+    :return: 200 if everything is ok; 401
+    """
     real_login, role = get_token_info(request)
     if real_login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')
@@ -161,6 +182,10 @@ def change_profile_info():
 @module.route('/getNotifications', methods=["GET"])
 @jwt_required
 def get_notifications():
+    """
+    Method returns pending notifications for a given user
+    :return: pending notifications
+    """
     real_login, role = get_token_info(request)
     if real_login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')
@@ -181,6 +206,10 @@ def get_notifications():
 @module.route('/download', methods=['GET'])
 @jwt_required
 def download():
+    """
+    Method for downloading file from a server
+    :return: file
+    """
     real_login, role = get_token_info(request)
     if real_login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')

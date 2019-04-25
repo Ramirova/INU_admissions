@@ -23,37 +23,13 @@ from app.candidates_module.controllers import get_token_info
 module = Blueprint('staff', __name__, url_prefix='/api/staff')
 
 
-@module.route('/login', methods=["POST"])
-def auth():
-    user = Staff_member.query.get(request.get_json().get('login'))
-    auth_token = create_access_token(identity=user.login)
-    if auth_token:
-        response = {
-            'token': auth_token,
-            'refresh_token': create_refresh_token(identity=user.login)
-        }
-        return make_response(jsonify(response)), 200
-    return Response("", status=401, mimetype='application/json')
-
-
-# The jwt_refresh_token_required decorator insures a valid refresh
-# token is present in the request before calling this endpoint. We
-# can use the get_jwt_identity() function to get the identity of
-# the refresh token, and use the create_access_token() function again
-# to make a new access token for this identity.
-@module.route('/refresh', methods=['POST'])
-@jwt_refresh_token_required
-def refresh():
-    current_user = get_jwt_identity()
-    ret = {
-        'access_token': create_access_token(identity=current_user)
-    }
-    return jsonify(ret), 200
-
-
 @module.route('/profile', methods=["GET"])
 @jwt_required
 def get_profile():
+    """
+        Method returns profile information for a requested user
+        :return: 200 and json with profile information if everything is ok; 401 if user do not have access rights
+    """
     user = Staff_member.query.get(request.args.get('login'))
     response = {
         'name': user.name,
@@ -66,6 +42,10 @@ def get_profile():
 @module.route('/interviews', methods=["GET"])
 @jwt_required
 def get_interviews():
+    """
+    Method for getting a list of interviews assigned to staff member
+    :return: list of interviews assigned to staff member
+    """
     login, user_role = get_token_info(request)
     if login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')
@@ -92,6 +72,10 @@ def get_interviews():
 @module.route('/grade', methods=["POST"])
 @jwt_required
 def grade_student():
+    """
+    Posting grade for a given student
+    :return: 200 if grade is posted; 401 if user do not have access rights
+    """
     login, user_role = get_token_info(request)
     if login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')
@@ -108,6 +92,10 @@ def grade_student():
 @module.route('/newInterviews', methods=["GET"])
 @jwt_required
 def get_new_interviews():
+    """
+    Method for getting a list of new interviews assigned to staff member
+    :return: list of new interviews assigned to staff member
+    """
     login, user_role = get_token_info(request)
     if login == "User not authorized":
         return Response("Token expired", status=401, mimetype='application/json')
