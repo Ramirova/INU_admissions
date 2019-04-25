@@ -11,10 +11,11 @@ from flask import (
     jsonify,
     make_response
 )
-import app
+# import app
 import os
+from app import app
 from werkzeug.utils import secure_filename
-
+from flask_mail import Mail, Message
 import flask_jwt_extended
 from flask_jwt_extended import (
     create_access_token,
@@ -25,33 +26,17 @@ from flask_jwt_extended import (
     get_jwt_identity,
     get_raw_jwt
 )
-
+from threading import Thread
 from app.common.models import User, Token
 from app.managers_module.models import Interview
 from .models import Candidate, Tests, TestsStates, db
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy import func
+from app.email import mail
 
 module = Blueprint('candidates', __name__, url_prefix='/api/candidates')
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
-
-
-# @module.route('/change_profile', methods=["POST"])
-# @jwt_required
-# def change_profile_info():
-#     candidate = Candidate.query.get(request.get_json().get('login'))
-#     candidate.name =
-#     candidate.surname =
-#     candidate.
-#     “name”: string,
-#     “surname”: string,
-#     “photo”: url?,
-#     “role”: string ????
-#     “status”: string -> optional,
-#     “progress”: int(0.
-#     .100).
-#     return None
 
 
 @module.route('/upload', methods=['POST'])
@@ -249,11 +234,25 @@ def handle_test_attempt(login, test_name, result):
     if attempted_tests == len(test_states):
         candidate = Candidate.query.get(request.get_json().get('login'))
         if successful_results == len(test_states):
+            send_message(login, "Your status updated", "Your status updated to: " + "PASSED TESTS. Now you will be assigned for interview")
             candidate.state = "PASSED_TESTS"
         else:
             candidate.state = "GRADED"
             candidate.grade = "T"
+            send_message(login, "Your status updated", "Unfortunately you have not pass tests. Try next year")
     db.session.commit()
+
+
+def send_async_email(msg):
+    with app.app_context():
+        mail.send(msg)
+
+
+def send_message(to, msg, body):
+    msg = Message(msg, sender='rozaliya_amirova@bk.ru', recipients=[to])
+    msg.body = body
+    thr = Thread(target=send_async_email, args=[msg])
+    thr.start()
 
 
 def get_token_info(request_data):

@@ -26,7 +26,7 @@ from .models import User, Notification, Token, db
 from app.candidates_module.models import Candidate
 from app.staff_module.models import Staff_member
 from app.managers_module.models import Manager
-from app.candidates_module.controllers import get_token_info
+from app.candidates_module.controllers import get_token_info, send_message
 from sqlalchemy.exc import SQLAlchemyError
 
 module = Blueprint('api', __name__, url_prefix='/api')
